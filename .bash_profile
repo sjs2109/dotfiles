@@ -3,6 +3,11 @@
 export BASH_SILENCE_DEPRECATION_WARNING=1
 export SDKROOT=$(xcrun --show-sdk-path)
 
+if which pyenv > /dev/null; then
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+fi
+
 export PATH="/opt/homebrew/bin:$PATH"
 export PATH="/usr/local/opt/ruby/bin:$PATH"
 export PATH="/opt/homebrew/sbin:$PATH"
@@ -28,6 +33,8 @@ export PATH="$PATH:/usr/local/opt/llvm/bin"
 export PATH="$PATH:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin"
 
 export PATH="$PATH:~/.vim/plugged/vim-iced/bin"
+
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 
 # git-flow-completion
 # https://github.com/bobthecow/git-flow-completion/wiki/Install-Bash-git-completion#homebrew

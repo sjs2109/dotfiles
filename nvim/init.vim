@@ -17,17 +17,21 @@ call plug#begin('~/.config/nvim/plugged')
     " file browser
     Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
         Plug 'junegunn/fzf.vim'
+    Plug 'preservim/nerdtree'
+        Plug 'ryanoasis/vim-devicons'
 
     " editing
     Plug 'tpope/vim-surround'
     Plug 'bling/vim-airline'           " BUFFER navigator, status line 을 제공한다.
     Plug 'easymotion/vim-easymotion'
+    Plug 't9md/vim-choosewin'
+
     Plug 'tpope/vim-commentary'
     Plug 'kana/vim-textobj-user'
         Plug 'kana/vim-textobj-indent'
         Plug 'thinca/vim-textobj-between'
     Plug 'wellle/targets.vim'           " text object utils
-    " Plug 'jiangmiao/auto-pairs'
+    Plug 'jiangmiao/auto-pairs', {'for': ['go']}
     Plug 'godlygeek/tabular'           " 텍스트 세로 정렬 도구
     Plug 'junegunn/vim-easy-align'
     Plug 'AndrewRadev/splitjoin.vim'
@@ -55,7 +59,6 @@ call plug#begin('~/.config/nvim/plugged')
     " Plug 'ap/vim-css-color'             " #rrggbb 형식의 문자열에 색깔을 입혀준다.
     Plug 'mhinz/vim-startify'           " 시작 화면을 꾸며준다. MRU가 있어 편리하다.
 
-    " Plug 'koron/nyancat-vim'
     Plug 'johngrib/vimwiki', { 'branch': 'dev' }
     Plug 'johngrib/grib-wiki'
 
@@ -110,19 +113,23 @@ call plug#begin('~/.config/nvim/plugged')
     " clojure : vim-iced
     Plug 'liquidz/vim-iced', {'for': 'clojure'}
     Plug 'liquidz/vim-iced-coc-source', {'for': 'clojure'}
+    " Plug 'lambdalisue/fern.vim'
+    " Plug 'liquidz/vim-iced-fern-debugger', {'for': 'clojure'}
 
-    Plug 'junegunn/vim-peekaboo'
+    " Plug 'junegunn/vim-peekaboo'
     " Plug 'wfxr/minimap.vim', {'do': ':!cargo install --locked code-minimap'}
     Plug 'wfxr/minimap.vim'
+    Plug 'vim-scripts/YankRing.vim'
 
 call plug#end()
 
-function! InstallCocPlugins()
-    CocInstall coc-rls
-    CocInstall coc-tsserver
-    CocInstall coc-calc
-    CocInstall coc-phpls
-endfunction
+" https://github.com/neoclide/coc.nvim/wiki/Using-coc-extensions#install-extensions
+let g:coc_global_extensions = [
+            \ 'coc-ultisnips',
+            \ 'coc-explorer',
+            \ 'coc-clojure',
+            \ 'coc-pyright',
+            \ ]
 
 " For Neovim 0.1.3 and 0.1.4
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -289,18 +296,19 @@ filetype plugin indent on " Put your non-Plugin stuff after this line
 
     " 버퍼 관리
     " nnoremap <silent> <F2><F2>   :b#<CR>
-    nnoremap <silent> <F2><F2>   :BuffersDelete<CR>
+    nnoremap <silent> <F2>d   :BuffersDelete<CR>
     nnoremap <silent> <PageUp>   :bnext!<CR>
     nnoremap <silent> <PageDown> :bprevious!<CR>
     " nnoremap <silent> <F2><F3>   :bnext!<CR>
     " nnoremap <silent> <F2><F1>   :bprevious!<CR>
-    nnoremap <silent> <F2>d      :bd!<CR>
+    " nnoremap <silent> <F2>d      :bd!<CR>
     " 현재 버퍼를 닫고 이전 버퍼로 이동
-    nnoremap <silent> <F2>q      :bp <BAR> bd #<CR>
-    nnoremap <silent> <F2><F6>   :bd<CR>
+    nnoremap <silent> <F2><F6> :bp <BAR> bd #<CR>
+    nnoremap <silent> <F2>q    :bd<CR>
     " 현재 버퍼만 남기고 모두 닫기
     nnoremap <silent> <F2>o      :%bd <BAR> e # <BAR> bd #<CR>
-    nnoremap <silent> <F2><F1> :buffers<CR>:buffer<Space>
+    nnoremap <silent> <F2><F2> :buffers<CR>:buffer<Space>
+    nnoremap <silent> <F2><F3> :q<CR>
 
     " https://www.reddit.com/r/neovim/comments/mlqyca/fzf_buffer_delete/
     function! s:list_buffers()
@@ -322,6 +330,9 @@ filetype plugin indent on " Put your non-Plugin stuff after this line
     inoremap <C-e> <C-O>$
     inoremap <C-l> <right>
 
+    " visual 모드에서 선택한 문자열로 검색한다.
+    " https://vim.fandom.com/wiki/Search_for_visually_selected_text
+    vnoremap <Space>* y/\V<C-R>=escape(@",'/\')<CR><CR>
 
     "Bubble lines
     " nnoremap <M-K> ddkP
@@ -430,6 +441,8 @@ filetype plugin indent on " Put your non-Plugin stuff after this line
     nnoremap <silent>S <nop>
     vnoremap <silent>s <nop>
 
+    nnoremap <Space><f> <Esc>:let @z=@/<CR>/\v[)"}]<CR>:let @/=@z<CR>
+    nnoremap <Space><b> <Esc>:let @z=@/<CR>?\v[("{]<CR>:let @/=@z<CR>
 
     nnoremap =e :Autoformat<CR>
 
@@ -557,5 +570,8 @@ augroup minimap_auto_close
     autocmd VimLeavePre * MinimapClose
 augroup END
 
+nnoremap <silent> <F9> :YRShow<CR>
+
 set fileencodings=utf-8,euc-kr
+
 

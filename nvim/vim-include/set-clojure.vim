@@ -8,18 +8,69 @@ let g:loaded_clojure_setting = 1
 " https://liquidz.github.io/vim-iced/#cheatsheet
 " REPL 띄우고 vim에서 접속하려면
 " $ iced repl -A:dev
+" $ iced repl -A:dev:test:itest
+" $ iced repl -A:migration
 
 let g:clojure_vim_iced_loaded = v:true
 let g:clojure_conjure_loaded = v:false
+" let g:iced#debug#debugger = 'fern'
+let g:iced#debug#debugger = 'default'
 
 let g:clj_fmt_config = '{:indentation? true, :remove-surrounding-whitespace? true, :remove-trailing-whitespace? true, :remove-consecutive-blank-lines? false, :insert-missing-whitespace? true, :align-associative? false, :indents {#"^\w" [[:inner 0]], #".*" [[:inner 0]]}}'
 
+let g:tagbar_type_clojure = {
+    \ 'ctagstype' : 'Clojure',
+    \ 'sort': 0,
+    \ 'kinds' : [
+        \ 'n:ns',
+        \ 'e:form',
+        \ ],
+    \}
+
+augroup clojure_custom_syntax_color
+    " jdbc/with-transaction 같은 문자열의 jdbc/ 부분을 색칠한다.
+    autocmd FileType clojure syntax match ClojureRefNs /\v[\-a-zA-Z]+\//
+    autocmd FileType clojure highlight ClojureRefNs ctermfg=Green guifg=#e0c9b7
+
+    " https://vim.fandom.com/wiki/Regex_lookahead_and_lookbehind
+    " autocmd FileType clojure exe 'syntax match ClojureMiddleSymbolHeadChar /\([a-z] \)\@<=[a-zA-Z]/'
+
+    " let s:chars = '[a-zA-Z][a-zA-Z/\-]* '
+    " let s:lookbehind = '/\([(\[{]' .. s:chars .. '\)\@<='
+    " let s:lookahead = ' \@='
+    " autocmd FileType clojure exe 'syntax match ClojureMiddleSymbol2 '
+    "             \ .. s:lookbehind .. '[a-zA-Z\-][a-zA-Z\-]*'
+    "             \ .. s:lookahead
+    "             \ .. '/'
+    " autocmd FileType clojure highlight ClojureMiddleSymbol2 guifg=#cbe3e7 ctermfg=253 gui=bold
+
+    " let s:lookbehind2 = '/\([(\[{]' .. s:chars .. s:chars .. s:chars .. '\)\@<='
+    " autocmd FileType clojure exe 'syntax match ClojureMiddleSymbol4 '
+    "             \ .. s:lookbehind2 .. '[a-zA-Z\-][a-zA-Z\-]*'
+    "             \ .. s:lookahead
+    "             \ .. '/'
+    " autocmd FileType clojure highlight ClojureMiddleSymbol4 guifg=#cbe3e7 ctermfg=253 gui=bold
+
+    " let s:lookbehind3 = '/\([(\[{]' .. s:chars .. s:chars .. s:chars .. s:chars .. s:chars .. '\)\@<='
+    " autocmd FileType clojure exe 'syntax match ClojureMiddleSymbol6 '
+    "             \ .. s:lookbehind3 .. '[a-zA-Z\-][a-zA-Z\-]*'
+    "             \ .. s:lookahead
+    "             \ .. '/'
+
+    " let g:lookahead4 = s:lookbehind3
+
+    " let s:clouds_subtle = { "gui": "#cbe3e7", "cterm": "253", "cterm16": "7"}
+    " autocmd FileType clojure highlight default link ClojureMiddleSymbol2 markdownIdDeclaration
+    " autocmd FileType clojure highlight default link ClojureMiddleSymbol4 markdownIdDeclaration
+    " autocmd FileType clojure highlight default link ClojureMiddleSymbol6 markdownIdDeclaration
+augroup END
+
 augroup vim_clojure_coc
-    " autocmd FileType clojure nmap <silent> <C-]> <Plug>(coc-definition)
-    autocmd FileType clojure nmap <silent> <C-]> :IcedDefJump<CR>
+    autocmd FileType clojure nmap <silent> <C-]> <Plug>(coc-definition)
+    autocmd FileType clojure nmap <silent> s<C-]> :IcedDefJump<CR>
     autocmd FileType clojure nmap <silent> gy <Plug>(coc-type-definition)
     autocmd FileType clojure nmap <silent> gr <Plug>(coc-references)
-    autocmd VimLeavePre clojure TagbarClose
+    " autocmd VimLeavePre clojure TagbarClose
 augroup END
 
 augroup vim_iced
@@ -29,10 +80,13 @@ augroup vim_iced
     " coc-clojure 사용은i :call CocAction 을 사용하고, 파라미터는 다음 파일의 "commands"를 참고할 것.
     " https://github.com/NoahTheDuke/coc-clojure/blob/main/package.json
 
+    autocmd FileType clojure set list listchars=tab:⇥\ ,trail:·,extends:>,precedes:<,space:·,multispace:\ ·
+    " autocmd FileType clojure set list listchars=tab:⇥\ ,trail:·,extends:>,precedes:<,space:·
     autocmd FileType clojure nmap sss :IcedCommandPalette<CR>
 
     " REPL: - "sr"
     autocmd FileType clojure nmap srr <Plug>(iced_stdout_buffer_toggle)
+    autocmd FileType clojure nmap srb <C-w>J10<C-w>-
     autocmd FileType clojure nmap srd <Plug>(iced_stdout_buffer_clear)
     autocmd FileType clojure nmap src <Plug>(iced_connect)
     autocmd FileType clojure nmap sri <Plug>(iced_interrupt)
@@ -114,7 +168,8 @@ augroup vim_iced
     " autocmd FileType clojure nmap <silent> scc :call CocAction('runCommand', 'lsp-clojure-cycle-coll')<CR>
     autocmd FileType clojure nmap <silent> scc :call CocAction('runCommand', 'lsp-clojure-change-coll')<CR>
     autocmd FileType clojure nmap <silent> scf :call CocAction('runCommand', 'lsp-clojure-create-function')<CR>
-    " autocmd FileType clojure nmap <silent> scp :call CocAction('runCommand', 'lsp-clojure-cycle-privacy')<CR>
+    " 커서가 위치한 단어를 복사해서 아랫줄에 _ (println 단어)를 만들어 준다. let 구문에서 사용할 것.
+    autocmd FileType clojure nmap scp yiwo_<Space>(println "<C-r>":" <C-r>")<Esc>
     autocmd FileType clojure nmap sc# <Plug>(sexp_move_to_prev_bracket)i#_<Esc>``
     autocmd FileType clojure nmap sc3 <Plug>(sexp_move_to_prev_element_head)i#_<Esc>l
     autocmd FileType clojure nmap scl :IcedMoveToLet<CR>
@@ -138,12 +193,24 @@ augroup vim_iced
     " 아직 필요를 못 느낌
     " :IcedTestSpecCheck
 
+    " Debug: - "sd"
+    autocmd FileType clojure nmap sdd :IcedToggleTraceVar<CR>
+    autocmd FileType clojure nmap sdv :IcedToggleTraceVar<Space>
+    autocmd FileType clojure nmap sdn :IcedToggleTraceNs<Space>
+    autocmd FileType clojure nmap sdb :IcedBrowseTapped<CR>
+
     autocmd FileType clojure nmap <silent> <Tab><Tab>r <Plug>(coc-references)
 
     autocmd FileType clojure nmap == <Plug>(iced_format)
     " https://github.com/junegunn/vim-easy-align/issues/115#issuecomment-325899234
     autocmd FileType clojure nnoremap =[ vi[<c-v>$:EasyAlign\ g/^\S/<cr>gv=
     autocmd FileType clojure nnoremap ={ vi{<c-v>$:EasyAlign\ g/^\S/<cr>gv=
+
+    " autocmd FileType clojure let &iskeyword = '@,48-57,_,192-255,?,-,*,!,+,=,<,>,.,:,$,#,%,&,39'
+    " autocmd FileType clojure nnoremap * :let &iskeyword = '@,48-57,_,192-255,?,-,*,!,+,=,<,>,.,:,$,#,%,&,39'<CR>*
+    " autocmd FileType clojure nnoremap s* :let &iskeyword = '@,48-57,_,192-255,?,-,*,!,+,/,=,<,>,.,:,$,#,%,&,39'<CR>*
+    " autocmd FileType clojure nnoremap # :let &iskeyword = '@,48-57,_,192-255,?,-,*,!,+,=,<,>,.,:,$,#,%,&,39'<CR>#
+    " autocmd FileType clojure nnoremap s# :let &iskeyword = '@,48-57,_,192-255,?,-,*,!,+,/,=,<,>,.,:,$,#,%,&,39'<CR>#
 
     " Insert Mode:
     autocmd FileType clojure imap <C-f> <Esc><Plug>(sexp_move_to_next_bracket)a

@@ -108,12 +108,27 @@ augroup vimwikiauto
     autocmd BufRead,BufNewFile *.md call NewTemplate()
     autocmd FileType vimwiki inoremap <S-Right> <C-r>=vimwiki#tbl#kbd_tab()<CR>
     autocmd FileType vimwiki inoremap <S-Left> <Left><C-r>=vimwiki#tbl#kbd_shift_tab()<CR>
+
+    autocmd FileType vimwiki nnoremap scl vf)"zymz}oz0f(r:a $x`zf(df)hviW"zyPE:delm z
+
+    " Insert Mode:
+    autocmd FileType vimwiki inoremap <C-f> <Esc>:let @z=@/<CR>/\v[)"}\.]<CR>:let @/=@z<CR>a
+    autocmd FileType vimwiki inoremap <C-b> <Esc>:let @z=@/<CR>?\v[("{\.]<CR>:let @/=@z<CR>i
+
 augroup END
 
-augroup vimwiki_tagbar
+let g:tagbar_type_vimwiki = {
+    \ 'ctagstype' : 'vimwiki',
+    \ 'sort': 0,
+    \ 'kinds' : [
+        \ 't:목차'
+    \ ]
+\ }
+
+" augroup vimwiki_tagbar
     " autocmd BufRead,BufNewFile *wiki/*.md TagbarOpen
-    autocmd VimLeavePre *.md TagbarClose
-augroup END
+    " autocmd VimLeavePre *.md TagbarClose
+" augroup END
 
 function! RefreshTagbar()
      let l:is_tagbar_open = bufwinnr('__Tagbar__') != -1
